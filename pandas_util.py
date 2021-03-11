@@ -1,5 +1,5 @@
 import pandas as pd
-
+from util_general import dl_to_ld
 
 def rolling_series(series,window_size,step_size):
     window_list = []
@@ -15,6 +15,11 @@ def rolling_dataframes(df,window_size,step_size):
     list_of_dicts = dl_to_ld(dict_of_lists)
     list_of_dfs = list(map(lambda d: pd.DataFrame(d),list_of_dicts))
     return list_of_dfs
+
+
+def df_to_df_list(df, split_columns, axis=0, level=0):
+    data_dict = dict(tuple(df.groupby(by=split_columns, level=level, axis=axis)))
+    return list(data_dict.values())
 
 
 def samples_per_season(time_stamps, season_string):
