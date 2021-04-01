@@ -62,24 +62,29 @@ def match_hierarchical(ar1, ar2,thresholds):
             used2 = list(np.array(index_pairs)[:, 1])
     return pairs,index_pairs
 
-def rolling_window(array, window_size, step_size):
-    """
-    Applies rolling window to 1-D input array.
-    Return 2D array with dimensionality [len(array)/step_size, window_size]
-    :param array: 1D array -- input array
-    :param window_size: int -- window size of rolling window
-    :param step_size: int step-size of rolling windos
-    :return: 2D array with rolling window values for each step
-    """
-    if not isinstance(array, np.ndarray):
-        array = np.array(array)
 
-    n_rows = ((array.size-window_size)//step_size)+1
-    n = array.strides[0]
-    return np.lib.stride_tricks.as_strided(array, shape=(n_rows,window_size), strides=(step_size*n,n))
-    # Acknowledgement:
-    # adapted from Divakar's post on
-    # https://stackoverflow.com/questions/40084931/taking-subarrays-from-numpy-array-with-given-stride-stepsize/40085052#40085052
+def rolling_window_multi(a, window, axis=-1, step_size=1):
+    '''Return a windowed array.
+    source: https://gist.github.com/joe-antognini/ebef3ecfb7624d2980eae7ead8007cfc
+    Slightly adapted by adding step size
+    Parameters:
+      a: A numpy array
+      window: The size of the window
+
+    Returns:
+      An array that has been windowed
+    '''
+
+    if axis == -1:
+        axis = a.ndim - 1
+
+    if 0 <= axis <= a.ndim - 1:
+        shape = (a.shape[:axis] + (a.shape[axis] - window + 1, window) +
+                 a.shape[axis + 1:])
+        strides = a.strides[:axis] + (step_size*a.strides[axis],) + a.strides[axis:]
+        return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+    else:
+        raise ValueError('rolling_window: axis out of bounds')
 
 
 def quadratic_subarray(indices, original):

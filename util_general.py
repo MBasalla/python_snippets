@@ -107,3 +107,40 @@ def stdout_to_str(function):
     sys.stdout = sys.__stdout__
     console_out = x.data
     return fun_out, console_out
+
+
+def merge_index_regions(indices, tolerance=0):
+    # TODO: find anomaly peak detection based
+    """
+    Finds connected index regions based on threshold and statistical test,
+    window size and step size chosen at class initialization
+    Keyword arguments:
+        :param indices: list int -- a list of indices e.g. from a list or 1 dimension of an array
+        :param tolerance: int -- a tolerance value, defines small distance
+        at which non-connected anomaly regions should still be merged.
+        """
+    indices.sort()
+    index_regions = []
+    current_start = None
+    current_end = None
+    for anomaly in indices:
+        # initialize first anomaly region
+        if current_start is None:
+            # start at current anomaly
+            current_start = anomaly
+            # end at the end of the rolling window used to calculate anomaly measure
+            current_end = anomaly + 1
+        # does current anomaly lie within or connect to the previous anomaly region
+        # or if not, is the distance smaller then the tolerance
+        elif current_end + tolerance >= anomaly:
+            # merge anomaly regions
+            new_end = anomaly + 1
+            # should rigorous testing be performed before merging?
+            current_end = new_end
+        else:
+            # else anomaly region is complete, save and create new anomaly region
+            index_regions += [(current_start, current_end)]
+            current_start = anomaly
+            current_end = anomaly + 1
+    index_regions += [(current_start, current_end)]
+    return index_regions
